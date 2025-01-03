@@ -39,12 +39,10 @@ export default {
 
 <style scoped>
 .login-container {
-    display: flex;
+    display: grid;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    /* Add the following line to center horizontally */
-    margin: 0 auto;
+    grid-row: 2;
 
 }
 
