@@ -5,20 +5,16 @@
 </template>
 
 <script>
-import importFresh from 'import-fresh';
-import '@/js/cledit/cledit.js';
-import '@/js/cledit/mdGrammar.js';
+/* global diff_match_patch */
+import _ from 'cledit';
+import '@/components/Editor/mdGrammar.js';
 import Prism from 'prismjs';
-import diff_match_patch from 'googlediff';
 
 export default {
     mounted() {
-        console.log(diff_match_patch);
-        window.diff_match_patch = diff_match_patch;
         const editor = window.cledit(document.querySelector('.main-editor'));
         editor.init({
             sectionHighlighter: function (section) {
-                console.log(Prism);
                 return Prism.highlight(section.text, 
                     window.mdGrammar({
                         fences: true,
