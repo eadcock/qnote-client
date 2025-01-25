@@ -1,45 +1,39 @@
 <template>
-    <div class="main-editor" :class="{ 'expanded': isExpanded }">
-        
-    </div>
+    <div class="main-editor" :class="{ 'expanded': isExpanded }"></div>
 </template>
 
 <script>
-/* global diff_match_patch */
-import _ from 'cledit';
-import '@/components/Editor/mdGrammar.js';
-import Prism from 'prismjs';
+import dmp from 'googlediff';
+window.diff_match_patch = dmp;
+// aight, fuck cledit
+// import '@/../node_modules/cledit/dist/cledit.js';
+// import '@/components/Editor/mdGrammar.js';
+import {schema} from "prosemirror-markdown"
+import {EditorState} from "prosemirror-state"
+import {EditorView} from "prosemirror-view"
+import {undo, redo, history} from "prosemirror-history"
+import {keymap} from "prosemirror-keymap"
 
 export default {
     mounted() {
-        const editor = window.cledit(document.querySelector('.main-editor'));
-        editor.init({
-            sectionHighlighter: function (section) {
-                return Prism.highlight(section.text, 
-                    window.mdGrammar({
-                        fences: true,
-                        tables: true,
-                        footnotes: true,
-                        abbrs: true,
-                        deflists: true,
-                        tocs: true,
-                        dels: true,
-                        subs: true,
-                        sups: true
-                    })
-                );
-            },
-            // sectionParser: function (text) {
-            //     let offset = 0;
-            //     let sectionList = [];
-            //     ;(text + '\n\n').replace(/^.+[ \t]*\n=+[ \t]*\n+|^.+[ \t]*\n-+[ \t]*\n+|^\#{1,6}[ \t]*.+?[ \t]*\#*\n+/gm, function (match, matchOffset) {
-            //         sectionList.push(text.substring(offset, matchOffset))
-            //         offset = matchOffset
-            //     });
-            //     sectionList.push(text.substring(offset));
-            //     return sectionList;
-            // }
-        })
+      const editor = document.querySelector('.main-editor');
+      let state = EditorState.create({
+        schema,
+        plugins: [
+          history(),
+          keymap({"Mod-z": undo, "Mod-y": redo})
+        ]
+      });
+      let view = new EditorView(editor, {
+        state,
+        dispatchTransaction(trans) {
+            console.log("Document size went from", trans.before.content.size,
+              "to", trans.doc.content.size);
+            let newState = view.state.apply(trans);
+            view.updateState(newState);
+        }
+      });
+
     },
     name: 'TextEditor',
     props: {
@@ -55,10 +49,10 @@ export default {
         }
     },
     methods: {
-        
+
         handleInput(event) {
             this.content = this.$refs.editableDiv.innerHTML;
-            
+            console.log(this.content);
             this.$emit('content-change', this.content);
 
         }
@@ -73,7 +67,9 @@ export default {
 }
 </script>
 
+<style src="prismjs/themes/prism-dark.css"></style>
 <style scoped>
+
 .main-editor {
     flex: 1;
     background-color: var(--color-background);
